@@ -9,6 +9,7 @@ A simple and powerful command-line interface for interacting with Anthropic's Cl
 - **Quick Start Mode**: Simply type `claude start` to begin chatting immediately
 - **Single Question Mode**: Ask Claude one-off questions with `claude ask`
 - **Interactive Chat**: Have full conversations with message history using `claude chat`
+- **Environment Check**: Verify your setup with `claude check`
 - **Configurable**: Easily customize model, temperature, and system prompts
 - **Cross-Platform**: Works on macOS, Linux, and Windows
 
@@ -32,9 +33,12 @@ chmod +x install-claude-cli.sh
 ```
 
 The installer will:
+- Detect the correct Python command for your system
+- Install required dependencies
 - Set up the `claude` command in your system
 - Prompt you for your API key and store it securely
-- Make the tool accessible from anywhere in your terminal
+- Create a shortcut alias `c` for even quicker access
+- Test your installation to ensure everything works
 
 ### Option 2: Manual Installation (macOS/Linux)
 
@@ -44,17 +48,17 @@ git clone https://github.com/MortenBeck/ClaudeCLI.git
 cd ClaudeCLI
 
 # Install required packages
-pip install -e .
+python3 -m pip install anthropic
 
 # Make the script executable
-chmod +x claude-cli.py
+chmod +x claude_cli.py
 
 # Set up your API key (replace with your actual key)
 echo "your_api_key_here" > ~/.claude_api_key
 chmod 600 ~/.claude_api_key
 
 # Create an alias in your shell configuration
-echo 'alias claude="python /path/to/ClaudeCLI/claude-cli.py"' >> ~/.bashrc  # or ~/.zshrc
+echo 'alias claude="python3 '"$(pwd)"'/claude_cli.py"' >> ~/.bashrc  # or ~/.zshrc
 source ~/.bashrc  # or source ~/.zshrc
 ```
 
@@ -66,31 +70,47 @@ source ~/.bashrc  # or source ~/.zshrc
    cd ClaudeCLI
    ```
 
-2. **Install required packages**
+2. **Run the Windows installer**
    ```
-   pip install -e .
-   ```
-
-3. **Set up your API key**
-   
-   Create a file at `%USERPROFILE%\.claude_api_key` containing only your API key.
-   
-   Or set an environment variable:
-   ```
-   setx ANTHROPIC_API_KEY "your_api_key_here"
+   install-claude-cli.bat
    ```
 
-4. **Create a batch file for easy access**
+   The installer will:
+   - Check for Python and install required packages
+   - Create the `claude` and `c` commands
+   - Offer to add the commands to your PATH
+   - Store your API key securely
+
+3. **Alternative: Manual setup**
    
-   Create a file named `claude.bat` with the following content:
+   If you prefer manual setup:
    ```
-   @echo off
-   python "C:\path\to\ClaudeCLI\claude-cli.py" %*
-   ```
+   pip install anthropic
    
-   Save this file in a directory that's in your system PATH (e.g., `C:\Windows`)
+   # Create API key file
+   echo your_api_key_here > %USERPROFILE%\.claude_api_key
+   
+   # Create a batch file
+   echo @echo off > claude.bat
+   echo python "%CD%\claude_cli.py" %%* >> claude.bat
+   ```
 
 ## Usage
+
+### Checking Your Environment
+
+To verify your installation and see important configuration details:
+
+```bash
+claude check
+```
+
+This will display:
+- System and Python version information
+- Script location and path
+- API key status
+- Configuration file status
+- Required package information
 
 ### Quick Start (Recommended)
 
@@ -101,6 +121,12 @@ claude start
 ```
 
 This starts an interactive session with default settings. Press `Ctrl+C` to exit.
+
+If you set up the shortcut alias, you can simply use:
+
+```bash
+c
+```
 
 ### Single Question Mode
 
@@ -155,32 +181,6 @@ You can customize Claude CLI by editing the `config.json` file:
 }
 ```
 
-## Shortcut Alias
-
-For even faster access, you can set up a short alias:
-
-### macOS/Linux
-
-Add to your `~/.bashrc`, `~/.zshrc`, or equivalent:
-```bash
-alias c="claude start"
-```
-
-Then reload your shell configuration:
-```bash
-source ~/.bashrc  # or source ~/.zshrc
-```
-
-### Windows
-
-Create a batch file named `c.bat` with:
-```
-@echo off
-claude start %*
-```
-
-Save it to a directory in your PATH.
-
 ## Advanced Usage
 
 ### Using in Scripts
@@ -211,10 +211,40 @@ type myfile.txt | claude ask "Summarize this text:"
 
 ## Troubleshooting
 
-- **API Key Error**: Make sure your API key is stored in `~/.claude_api_key` or set as the `ANTHROPIC_API_KEY` environment variable
-- **Command Not Found**: Ensure the installation directory is in your PATH, or use the full path to the script
-- **Dependency Issues**: Try reinstalling dependencies with `pip install -r requirements.txt`
-- **Permission Denied**: On Unix systems, ensure the script is executable with `chmod +x claude-cli.py`
+If you encounter issues, the `check` command is your first step for diagnostics:
+
+```bash
+claude check
+```
+
+### Common Issues
+
+#### Command not found
+- **macOS/Linux**: Check if the `claude` command is in your PATH or if your alias is correctly defined
+- **Windows**: Ensure the batch file is in your PATH or use the full path to the script
+
+#### Python issues on macOS
+On macOS, you may need to use `python3` instead of `python`:
+```bash
+python3 /path/to/claude_cli.py start
+```
+
+#### API Key issues
+If you get authentication errors:
+```bash
+# Check if your API key is correctly stored
+cat ~/.claude_api_key
+
+# Or set it directly in your environment
+export ANTHROPIC_API_KEY="your-api-key-here"
+```
+
+#### Path issues with spaces
+If your installation path contains spaces:
+```bash
+# Use quotes in your alias
+alias claude="python3 '/path with spaces/claude_cli.py'"
+```
 
 ## License
 

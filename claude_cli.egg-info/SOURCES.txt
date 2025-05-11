@@ -1,0 +1,10 @@
+LICENSE
+README.md
+claude_cli.py
+setup.py
+claude_cli.egg-info/PKG-INFO
+claude_cli.egg-info/SOURCES.txt
+claude_cli.egg-info/dependency_links.txt
+claude_cli.egg-info/entry_points.txt
+claude_cli.egg-info/requires.txt
+claude_cli.egg-info/top_level.txt

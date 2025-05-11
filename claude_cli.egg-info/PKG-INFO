@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: claude-cli
+Version: 0.1.0
+Summary: A CLI tool for interacting with Anthropic's Claude AI
+Author: YourName
+Requires-Python: >=3.7
+License-File: LICENSE
+Requires-Dist: anthropic>=0.17.0
+Dynamic: author
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
