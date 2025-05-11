@@ -2,15 +2,56 @@ import os
 import sys
 import json
 import argparse
+import signal
 import anthropic
 from anthropic import Anthropic
+from pathlib import Path
+
+def load_config():
+    """Load configuration from config.json file."""
+    script_dir = Path(__file__).parent.absolute()
+    config_file = script_dir / "config.json"
+    
+    defaults = {
+        "default_model": "claude-3-7-sonnet-20250219",
+        "default_temperature": 0.7,
+        "default_max_tokens": 4000,
+        "default_system_message": "You are Claude, a helpful AI assistant.",
+        "chat_prompt": "You: ",
+        "welcome_message": "Welcome to Claude CLI! Type your message and press Enter. Use Ctrl+C to exit."
+    }
+    
+    if config_file.exists():
+        try:
+            with open(config_file, 'r') as f:
+                loaded_config = json.load(f)
+                # Update defaults with loaded values
+                defaults.update(loaded_config)
+        except Exception as e:
+            print(f"Warning: Could not load config file: {e}")
+            print("Using default settings.")
+    
+    return defaults
 
 def get_client():
     """Initialize and return the Anthropic client."""
+    # First check environment variable
     api_key = os.environ.get("ANTHROPIC_API_KEY")
+    
+    # If not found, check for stored key
     if not api_key:
-        print("Error: ANTHROPIC_API_KEY environment variable not set.")
+        api_key_file = os.path.expanduser("~/.claude_api_key")
+        if os.path.exists(api_key_file):
+            try:
+                with open(api_key_file, 'r') as f:
+                    api_key = f.read().strip()
+            except:
+                pass
+    
+    if not api_key:
+        print("Error: ANTHROPIC_API_KEY environment variable not set and no API key found.")
         print("Please set it with: export ANTHROPIC_API_KEY='your_api_key'")
+        print("Or create a file at ~/.claude_api_key containing your API key.")
         sys.exit(1)
     
     return Anthropic(api_key=api_key)
@@ -56,6 +97,7 @@ def handle_conversation(args):
 def chat_mode(args):
     """Interactive chat mode with Claude."""
     client = get_client()
+    config = load_config()
     
     # Initialize conversation
     messages = []
@@ -73,7 +115,7 @@ def chat_mode(args):
     
     while True:
         # Get user input
-        user_input = input("\nYou: ")
+        user_input = input(f"\n{config['chat_prompt']}")
         
         # Check for exit command
         if user_input.lower() in ['exit', 'quit']:
@@ -110,6 +152,33 @@ def chat_mode(args):
             print(f"Error: {e}")
             continue
 
+def start_mode():
+    """Quick-start chat mode with default settings, runs until Ctrl+C."""
+    config = load_config()
+    
+    print(config["welcome_message"])
+    print("-" * 50)
+    
+    # Create args object with default values from config
+    class Args:
+        model = config["default_model"]
+        temperature = config["default_temperature"]
+        max_tokens = config["default_max_tokens"]
+        system = config["default_system_message"]
+    
+    # Set up signal handler for graceful exit
+    def signal_handler(sig, frame):
+        print("\nChat session ended.")
+        sys.exit(0)
+    
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    try:
+        chat_mode(Args())
+    except KeyboardInterrupt:
+        print("\nChat session ended.")
+        sys.exit(0)
+
 def main():
     parser = argparse.ArgumentParser(description="CLI tool for interacting with Anthropic's Claude")
     
@@ -135,12 +204,21 @@ def main():
     # Chat mode
     chat_parser = subparsers.add_parser("chat", help="Start an interactive chat session with Claude")
     
-    args = parser.parse_args()
+    # Quick start mode
+    start_parser = subparsers.add_parser("start", help="Start a chat session immediately (Ctrl+C to exit)")
     
-    if args.command == "ask":
-        handle_conversation(args)
-    elif args.command == "chat":
-        chat_mode(args)
+    # Handle command line arguments
+    if len(sys.argv) > 1:
+        args = parser.parse_args()
+        
+        if args.command == "ask":
+            handle_conversation(args)
+        elif args.command == "chat":
+            chat_mode(args)
+        elif args.command == "start":
+            start_mode()
+        else:
+            parser.print_help()
     else:
         parser.print_help()
 
