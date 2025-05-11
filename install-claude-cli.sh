@@ -1,17 +1,15 @@
-# Script to install the Claude CLI tool
-
 # Determine the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Make the main script executable
-chmod +x "$SCRIPT_DIR/claude-cli.py"
+chmod +x "$SCRIPT_DIR/claude_cli.py"
 
 # Create a symbolic link to the script in /usr/local/bin (or another directory in your PATH)
 if [ -d "/usr/local/bin" ] && [ -w "/usr/local/bin" ]; then
     # Create a simple wrapper script
     cat > /usr/local/bin/claude << 'EOF'
 #!/bin/bash
-# Wrapper for claude-cli.py
+# Wrapper for claude_cli.py
 
 # Set the API key (if not already set)
 if [ -z "$ANTHROPIC_API_KEY" ]; then
@@ -27,7 +25,7 @@ if [ -z "$ANTHROPIC_API_KEY" ]; then
 fi
 
 # Call the actual script with all arguments passed through
-SCRIPT_PATH="SCRIPT_DIR_PLACEHOLDER/claude-cli.py"
+SCRIPT_PATH="SCRIPT_DIR_PLACEHOLDER/claude_cli.py"
 "$SCRIPT_PATH" "$@"
 EOF
 
@@ -44,7 +42,7 @@ else
     echo "Error: Unable to create symbolic link in /usr/local/bin."
     echo "You may need to run this script with sudo privileges."
     echo "Alternatively, you can add the following alias to your shell configuration:"
-    echo "alias claude='$SCRIPT_DIR/claude-cli.py'"
+    echo "alias claude='$SCRIPT_DIR/claude_cli.py'"
 fi
 
 # Prompt for API key if not set
@@ -55,7 +53,7 @@ if [ -z "$ANTHROPIC_API_KEY" ] && [ ! -f "$HOME/.claude_api_key" ]; then
         echo "Enter your Anthropic API key:"
         read -r api_key
         echo "$api_key" > "$HOME/.claude_api_key"
-        chmod 600 "$HOME/.claude_api_key"  # Secure the file
+        chmod 600 "$HOME/.claude_api_key"  
         echo "API key saved to $HOME/.claude_api_key"
     else
         echo "You'll need to set the ANTHROPIC_API_KEY environment variable later."

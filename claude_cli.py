@@ -3,9 +3,8 @@ import sys
 import json
 import argparse
 import signal
-import anthropic
-from anthropic import Anthropic
 from pathlib import Path
+from anthropic import Anthropic
 
 def load_config():
     """Load configuration from config.json file."""
